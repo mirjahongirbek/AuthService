@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 namespace AuthService.Interfaces.Models
 {
-    public  class User<TUserRole, TKey> : IEntity<int>
-        where TUserRole: UserRole
+    public  interface IUser<TUserRole> : IEntity<int>
+        where TUserRole:class, IUserRole
     {
-       public int Id { get; set; }
-       public string UserName { get; set; }
-       public string Email { get; set; }
-       public string Salt { get; set; }
-       public string Password { get; set; }
-       public int Position { get; set; }
-       public ICollection<TUserRole> UserRoles { get; set; }
+       
+        string UserName { get; set; }
+        string Email { get; set; }
+        string Salt { get; set; }
+        string Password { get; set; }
+        int Position { get; set; }
+        ICollection<TUserRole> UserRoles { get; set; }
     }
 
 }

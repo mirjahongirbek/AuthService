@@ -12,10 +12,10 @@ using System.Threading.Tasks;
 
 namespace AuthService.Service
 {
-    public class AuthRepository<TUser, TUserRole, TRole> : IAuthRepository<TUser, TRole, int>
-        where TUser : User<TUserRole, int>
-        where TRole : Role<int>
-        where TUserRole : UserRole<int>
+    public class AuthRepository<TUser, TUserRole, TRole> 
+      where TRole :class, IRole<int>
+        where TUserRole :class, IUserRole
+          where TUser : class, IUser<TUserRole>
     {
         private DbSet<TUser> _dbSet;
         private DbContext _context;
@@ -56,12 +56,14 @@ namespace AuthService.Service
         {
             var user = await _dbSet.FirstOrDefaultAsync(m => m.UserName == username
             && m.Password == CoreState.GetHashString(password));
+            if(user== null) { return null; }
             if (user.UserRoles == null)
             {
                 var usrRoles = _context.Set<TUserRole>();
                 var userRoles = usrRoles.Where(mbox => mbox.UserId == user.Id).ToList();
                 user.UserRoles = userRoles;
             }
+            return null;
         }
         private List<Claim> Claims(TUser user)
         {
@@ -71,10 +73,11 @@ namespace AuthService.Service
             claims.Add(new Claim(ClaimTypes.Name, user.UserName));
             claims.Add(new Claim("Position", user.Position.ToString()));
             claims.Add(new Claim("Email", user.Email));
-            claims.Add(new user.Position.ToString())
+            claims.Add(new Claim("Position",user.Position.ToString()));
+
             foreach (var i in user.UserRoles)
             {
-                new Claim(ClaimTypes.Role, i.Role.Name);
+               
             }
             foreach (var i in usr.GetProperties())
             {

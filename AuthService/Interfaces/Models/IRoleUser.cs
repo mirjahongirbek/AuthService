@@ -2,13 +2,15 @@
 
 namespace AuthService.Interfaces.Models
 {
-    public class UserRole:IEntity<int>
+    public interface IUserRole<TUser, TRole>:IEntity<int>
+        where TUser: IUser<>
+        where TRole: IRole
     {
-        public int Id { get; set; }
-     public   int UserId { get; set; }
-     public   User<this,int> User { get; set;}
-     public   int RoleId { get; set; }
-     public   Role<int> Role { get; set; }
+      
+        int UserId { get; set; }
+        TUser User { get; set;}
+        int RoleId { get; set; }
+        IRole Role { get; set; }
     }
 
 

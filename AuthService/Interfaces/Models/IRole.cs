@@ -4,13 +4,13 @@ using RepositoryCore.Interfaces;
 
 namespace AuthService.Interfaces.Models
 {
-    public class Role<TKey> : IEntity<TKey>
+    public interface IRole : IEntity<int>
     {
-        public TKey Id { get; set; }
-       public string Name { get; set; }
-       public int Position { get; set; }
-       public string Description { get; set; }
-       public RoleEnum Roles { get; set; }
+       
+        string Name { get; set; }
+        int Position { get; set; }
+        string Description { get; set; }
+        RoleEnum Roles { get; set; }
     }
 
 

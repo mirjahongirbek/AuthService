@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 namespace AuthService.Interfaces.Service
 {
     public interface IAuthRepository<TUser, TRole, TKey>
-        where TUser : class, IUser<TRole, TKey>
-        where TRole:class, IRole<TKey>
+        where TUser : class, IUser<TRole>
+        where TRole:class, IUserRole
     {
         Task<TUser> GetLoginOrEmail(string model);
         Task<TUser> GetUser(TUser model);
