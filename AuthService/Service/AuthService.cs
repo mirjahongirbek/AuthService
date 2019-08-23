@@ -1,5 +1,4 @@
-﻿using AuthService.Interfaces.Models;
-using AuthService.Interfaces.Service;
+﻿using AuthService.Models;
 using EntityRepository.Context;
 using Microsoft.EntityFrameworkCore;
 using RepositoryCore.Attributes;
@@ -13,9 +12,9 @@ using System.Threading.Tasks;
 namespace AuthService.Service
 {
     public class AuthRepository<TUser, TUserRole, TRole> 
-      where TRole :class, IRole<int>
-        where TUserRole :class, IUserRole
-          where TUser : class, IUser<TUserRole>
+      where TRole :EntityRole
+        where TUserRole :EntityUserRole
+          where TUser :  EntityUser<TUserRole>
     {
         private DbSet<TUser> _dbSet;
         private DbContext _context;
@@ -26,33 +25,33 @@ namespace AuthService.Service
             _context = dbContext.DataContext;
         }
 
-        public Task Delete(int id)
+        public virtual Task Delete(int id)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TUser> GetLoginOrEmail(string model)
+        public virtual Task<TUser> GetLoginOrEmail(string model)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TUser> GetMe(string id)
+        public virtual Task<TUser> GetMe(string id)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<TUser> GetUser(TUser model)
+        public virtual Task<TUser> GetUser(TUser model)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<bool> IsLoginedAsync(TUser model)
+        public virtual Task<bool> IsLoginedAsync(TUser model)
         {
             throw new System.NotImplementedException();
         }
 
 
-        public async Task<ClaimsIdentity> Login(string username, string password)
+        public virtual async Task<ClaimsIdentity> Login(string username, string password)
         {
             var user = await _dbSet.FirstOrDefaultAsync(m => m.UserName == username
             && m.Password == CoreState.GetHashString(password));
@@ -63,7 +62,13 @@ namespace AuthService.Service
                 var userRoles = usrRoles.Where(mbox => mbox.UserId == user.Id).ToList();
                 user.UserRoles = userRoles;
             }
-            return null;
+            var clams= Claims(user);
+            if(clams== null)
+            {
+                return null;
+            }
+            var claimsIdentity = new ClaimsIdentity(clams, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+            return claimsIdentity;
         }
         private List<Claim> Claims(TUser user)
         {
@@ -74,10 +79,10 @@ namespace AuthService.Service
             claims.Add(new Claim("Position", user.Position.ToString()));
             claims.Add(new Claim("Email", user.Email));
             claims.Add(new Claim("Position",user.Position.ToString()));
-
-            foreach (var i in user.UserRoles)
+            foreach (var role in user.UserRoles)
             {
-               
+                claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, role.Role.Name));
+
             }
             foreach (var i in usr.GetProperties())
             {
@@ -96,15 +101,16 @@ namespace AuthService.Service
             return claims;
         }
 
-        public Task Logout(string access)
+        public virtual async Task Logout(string access)
         {
-            throw new System.NotImplementedException();
+            
         }
-        public async Task<bool> RegisterAsync(TUser model)
+        public virtual async Task<bool> RegisterAsync(TUser model)
         {
+
+
             var user = await _dbSet.FirstOrDefaultAsync(m => m.UserName == model.UserName && m.Password == CoreState.GetHashString(model.Password));
             if (user != null) { return false; }
-
             _dbSet.Add(model);
             return true;
         }

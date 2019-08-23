@@ -1,4 +1,5 @@
-﻿using AuthService.Interfaces.Models;
+﻿using AuthService.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -6,12 +7,14 @@ using System.Linq.Expressions;
 namespace AuthService.Interfaces.Service
 {
     public interface IRoleRepository<T, TKey>
-        where T:class, IUserRole<TKey>
+        where T: EntityRole
     {
-        void Add(T model);
-        void Delete(T model);
-        void Delete(TKey id);
-        void Update(T model);
+        DbSet<T> DbSet { get; }
+        bool Add(T model);
+        bool Delete(T model);
+        
+        bool Delete(TKey id);
+        bool Update(T model);
         T Get(TKey id);
         T GetFirst(Expression<Func<T, bool>> expression);
         IEnumerable<T> Find(Expression<Func<T, bool>> expression);

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepositoryCore", "..\Reposi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityRepository", "..\EntityRepository\EntityRepository\EntityRepository.csproj", "{1DBCEB35-766C-4476-968E-FDE9A2C2D654}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAuth", "TestAuth\TestAuth.csproj", "{A04E6D2E-6FC1-4B90-8655-5DEC0CBB1EC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{1DBCEB35-766C-4476-968E-FDE9A2C2D654}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DBCEB35-766C-4476-968E-FDE9A2C2D654}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DBCEB35-766C-4476-968E-FDE9A2C2D654}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A04E6D2E-6FC1-4B90-8655-5DEC0CBB1EC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A04E6D2E-6FC1-4B90-8655-5DEC0CBB1EC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A04E6D2E-6FC1-4B90-8655-5DEC0CBB1EC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A04E6D2E-6FC1-4B90-8655-5DEC0CBB1EC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

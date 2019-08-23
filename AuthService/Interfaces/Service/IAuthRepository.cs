@@ -1,12 +1,13 @@
-﻿using AuthService.Interfaces.Models;
+﻿
+using AuthService.Models;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AuthService.Interfaces.Service
 {
     public interface IAuthRepository<TUser, TRole, TKey>
-        where TUser : class, IUser<TRole>
-        where TRole:class, IUserRole
+        where TUser : EntityUser<TRole>
+        where TRole:EntityUserRole
     {
         Task<TUser> GetLoginOrEmail(string model);
         Task<TUser> GetUser(TUser model);
