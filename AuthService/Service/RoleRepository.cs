@@ -67,12 +67,13 @@ namespace AuthService.Service
 
         public virtual TRole GetFirst(Expression<Func<TRole, bool>> expression)
         {
-            throw new NotImplementedException();
+           return _dbSet.FirstOrDefault(expression);
         }
 
         public virtual bool Update(TRole model)
         {
-            throw new NotImplementedException();
+            _dbSet.Update(model);
+            return true;
         }
     }
 }
