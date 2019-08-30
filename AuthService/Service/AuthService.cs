@@ -56,7 +56,7 @@ namespace AuthService.Service
         public virtual async Task<ClaimsIdentity> Login(string username, string password)
         {
             var user = await _dbSet.FirstOrDefaultAsync(m => m.UserName == username
-            && m.Password == CoreState.GetHashString(password));
+            && m.Password == RepositoryState.GetHashString(password));
             if (user == null) { return null; }
             if (user.UserRoles == null)
             {

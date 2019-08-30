@@ -1,7 +1,7 @@
 ﻿
 namespace AuthService.Enum
 {
-    public enum RoleEnum
+    public enum PermissionEnum
     {
         Admin = 0,
         Moderator,
