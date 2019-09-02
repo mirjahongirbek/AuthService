@@ -3,7 +3,7 @@
 namespace AuthService.Models
 {
     public class EntityRole:Role<int>
-    {
+    { 
         
     }
 }
