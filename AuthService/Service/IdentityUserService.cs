@@ -15,19 +15,23 @@ using System.Threading.Tasks;
 
 namespace AuthService.Service
 {
-    public class AuthRepository<TUser, TUserRole, TRole>
-        : IAuthRepository<TUser, TUserRole, int>
-      where TRole : EntityRole
-      where TUserRole : EntityUserRole
-      where TUser : EntityUser<TUserRole>
+    public  class IdentityUserService<TUser,TRole, TUserRole>: IAuthRepository<TUser, TUserRole>
+        where TUser : IdentityUser
+        where TUserRole:IdentityUserRole
+        where TRole: IdentityRole
     {
-        private DbSet<TUser> _dbSet;
-        private DbContext _context;
-        public DbSet<TUser> DbSet => _dbSet;
-        public AuthRepository(IDbContext dbContext)
+        DbSet<TUser> _dbSet;
+        DbSet<TUserRole> _userRole;
+        DbContext _context;
+        public DbSet<TUser> DbSet { get; }
+        IRoleRepository<TRole> _roleService;
+        public IdentityUserService(IDbContext context, IRoleRepository<TRole> roleService)
         {
-            _dbSet = dbContext.DataContext.Set<TUser>();
-            _context = dbContext.DataContext;
+            _dbSet = context.DataContext.Set<TUser>();
+            _userRole = context.DataContext.Set<TUserRole>();
+            _context = context.DataContext;
+            _roleService = roleService;
+
         }
         public virtual async Task<bool> Delete(int id)
         {
@@ -39,6 +43,7 @@ namespace AuthService.Service
             _dbSet.Remove(user);
             return true;
         }
+        
         public virtual TUser Get(int id)
         {
             return _dbSet.FirstOrDefault(m => m.Id == id);
@@ -54,14 +59,9 @@ namespace AuthService.Service
         public virtual async Task<ClaimsIdentity> LoginClaims(string username, string password)
         {
             var user = await _dbSet.FirstOrDefaultAsync(m => m.UserName == username
-            && m.Password == RepositoryState.GetHashString(password));
+            && m.PasswordHash == RepositoryState.GetHashString(password));
             if (user == null) { return null; }
-            if (user.UserRoles == null)
-            {
-                var usrRoles = _context.Set<TUserRole>();
-                var userRoles = usrRoles.Where(mbox => mbox.UserId == user.Id).ToList();
-                user.UserRoles = userRoles;
-            }
+            _userRole.Where(m => m.UserId == user.Id);
             var clams = Claims(user);
             if (clams == null)
             {
@@ -77,12 +77,11 @@ namespace AuthService.Service
             claims.Add(new Claim("Id", user.Id.ToString()));
             claims.Add(new Claim(ClaimTypes.Name, user.UserName));
             claims.Add(new Claim("Position", user.Position.ToString()));
-            claims.Add(new Claim("Email", user.Email));
-            claims.Add(new Claim("Position", user.Position.ToString()));
-            foreach (var role in user.UserRoles)
+            claims.Add(new Claim("Email", user.Email??""));
+            var roles= GetRoles(user);
+            foreach (var role in roles)
             {
-                claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, role.Role.Name));
-
+                claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, role.Name));
             }
             foreach (var i in usr.GetProperties())
             {
@@ -107,9 +106,12 @@ namespace AuthService.Service
         public virtual async Task<bool> RegisterAsync(TUser model)
         {
             var user = await
-                _dbSet.FirstOrDefaultAsync(m => m.UserName == model.UserName && m.Password == RepositoryState.GetHashString(model.Password));
+                _dbSet.FirstOrDefaultAsync(m => m.UserName == model.UserName 
+                && m.PasswordHash == RepositoryState.GetHashString(model.PasswordHash));
             if (user != null) { return false; }
+            model.PasswordHash = RepositoryState.GetHashString(model.PasswordHash);
             _dbSet.Add(model);
+            _context.SaveChanges();
             return true;
         }
         public async Task<bool> Delete(TUser user)
@@ -124,21 +126,25 @@ namespace AuthService.Service
         public async Task Update(TUser user)
         {
             _dbSet.Update(user);
-
+            _context.SaveChanges();
+        }
+        List<TRole> GetRoles(TUser user)
+        {
+            List<TUserRole> userRoles = _userRole.Where(m => m.UserId == user.Id).ToList();
+            var IdRoles = userRoles.Select(m => m.RoleId).ToList();
+            var roles = _roleService.GetList(IdRoles);
+            return roles;
         }
         public virtual async Task<LoginResult> Login(string username, string password)
         {
             LoginResult loginResult = new LoginResult();
             var now = DateTime.UtcNow;
-            var user = await _dbSet.FirstOrDefaultAsync(m => m.UserName == username
-             && m.Password == RepositoryState.GetHashString(password));
+           var r= _dbSet.Where(m => true).ToList();
+            var user =_dbSet.Where(m => m.UserName == username
+             && m.PasswordHash == RepositoryState.GetHashString(password)).FirstOrDefault();
             if (user == null) { return null; }
-            if (user.UserRoles == null)
-            {
-                var usrRoles = _context.Set<TUserRole>();
-                var userRoles = usrRoles.Where(mbox => mbox.UserId == user.Id).ToList();
-                user.UserRoles = userRoles;
-            }
+           var roles= GetRoles(user);
+
             var clams = Claims(user);
             var claimsIdentity = new ClaimsIdentity(clams, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
             var jwt = new JwtSecurityToken(
@@ -150,19 +156,20 @@ namespace AuthService.Service
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
             user.Token = encodedJwt;
             var random = new Random();
             var refresh = "";
             for (var i = 0; i < 10; i++) refresh += i.ToString();
             user.RefreshToken = RepositoryState.GetHashString(encodedJwt + refresh);
-            user.LastDate = DateTime.Now;
+            user.LastLoginDate = DateTime.Now;
             await Update(user);
             loginResult.AccessToken = encodedJwt;
             loginResult.UserName = claimsIdentity.Name;
             loginResult.RefreshToken = user.RefreshToken;
-            loginResult.Roles = user.UserRoles.Select(mbox => mbox.Role.Name).ToList();
+            loginResult.Roles = roles.Select(m => m.Name).ToList();
+            //TODO
             return loginResult;
         }
     }
 }
+
