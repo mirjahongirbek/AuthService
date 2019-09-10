@@ -73,6 +73,21 @@ namespace AuthService.Service
             _dbSet.Update(model);
             return true;
         }
+
+        TRole IRoleRepository<TRole>.Delete(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        TRole IRoleRepository<TRole>.Update(TRole model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TRole> FindAll()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

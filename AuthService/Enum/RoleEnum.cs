@@ -12,4 +12,14 @@ namespace AuthService.Enum
         All,
         Edit
     }
+    public enum UserStatus
+    {
+        NotActivated,
+        Active,
+        Deleted,
+        Blocked,
+        IsUserClient,
+        SendOtp,
+        NewClienId
+    }
 }

@@ -1,5 +1,10 @@
-﻿using System;
+﻿using AuthService.Enum;
+using RepositoryCore.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Runtime.Serialization;
 
 namespace AuthService.Models
 {
@@ -7,13 +12,12 @@ namespace AuthService.Models
     /// Represents a user in the identity system
     /// </summary>
     /// <typeparam name="TKey">The type used for the primary key for the user.</typeparam>
-    public class IdentityUser
+    public partial class IdentityUser:IEntity<int>
     {
         /// <summary>
         /// Initializes a new instance of <see cref="IdentityUser{TKey}"/>.
         /// </summary>
         public IdentityUser() { }
-
         /// <summary>
         /// Initializes a new instance of <see cref="IdentityUser{TKey}"/>.
         /// </summary>
@@ -22,13 +26,11 @@ namespace AuthService.Models
         {
             UserName = userName;
         }
-
         /// <summary>
         /// Gets or sets the primary key for this user.
         /// </summary>
         [Column("id")]
         public virtual int Id { get; set; }
-
         /// <summary>
         /// Gets or sets the user name for this user.
         /// </summary>
@@ -46,6 +48,10 @@ namespace AuthService.Models
         /// </summary>
         [Column("email")]
         public virtual string Email { get; set; }
+        [Column("last_otp")]
+        public virtual string LastOtp { get; set; }
+        [Column("last_otp_date")]
+        public virtual DateTime LastOtpDate { get; set; }
 
         /// <summary>
         /// Gets or sets the normalized email address for this user.
@@ -59,13 +65,22 @@ namespace AuthService.Models
         /// <value>True if the email address has been confirmed, otherwise false.</value>
         [Column("confirm")]
         public virtual bool Confirmed { get; set; }
-
+        [Column("user_status")]
+        public virtual UserStatus UserStatus { get; set; }
         /// <summary>
         /// Gets or sets a salted and hashed representation of the password for this user.
         /// </summary>
+        [IgnoreDataMember]
         [Column("password")]
         public virtual string Password { get; set; }
-
+        [IgnoreDataMember]
+        [Column("devices")]
+        public string Devices { get; set; }
+        [NotMapped]
+        public List<string> DeviceList { get {
+               var devices=Devices.Split(",");
+                return devices.ToList();
+            } }
         /// <summary>
         /// A random value that must change whenever a users credentials change (password changed, login removed)
         /// </summary>
@@ -144,12 +159,30 @@ namespace AuthService.Models
         [Column("position")]
         public virtual int Position { get; set; }
 
+
         /// <summary>
         /// Returns the username for this user.
         /// </summary>
         public override string ToString()
             => UserName;
     }
-
+    /// <summary>
+    /// Identity User Functions
+    /// </summary>
+    public partial class IdentityUser
+    {
+        public bool CheckDevice(string deviceId)
+        {
+            if (string.IsNullOrEmpty(DeviceList.FirstOrDefault(m => m == deviceId))){
+                return false;
+            }
+            return true;
+        }
+        public void AddDeviceId(string deviceId)
+        {
+            Devices += "," + deviceId;
+        }
+        
+    }    
 
 }

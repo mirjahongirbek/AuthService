@@ -1,4 +1,5 @@
 ﻿using RepositoryCore.Enums.Enum;
+using RepositoryCore.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,7 +11,7 @@ namespace AuthService.Models
     /// Represents a role in the identity system
     /// </summary>
     /// <typeparam name="TKey">The type used for the primary key for the role.</typeparam>
-    public class IdentityRole
+    public class IdentityRole:IEntity<int>
     {
         /// <summary>
         /// Initializes a new instance of <see cref="IdentityRole{TKey}"/>.
@@ -49,7 +50,7 @@ namespace AuthService.Models
         /// <summary>
         /// A random value that should change whenever a role is persisted to the store
         /// </summary>
-
+        [Column("concurrency_stamp")]
         public virtual string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
@@ -80,9 +81,8 @@ namespace AuthService.Models
         /// </summary>
         [Column("actions")]
         public string Actions { get; set; }
-
         [NotMapped]
-        public List<Action> ActionsList { get; }
+        public List<Action> ActionsList { get; set; }
     }
 
 

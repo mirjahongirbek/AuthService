@@ -12,8 +12,9 @@ namespace AuthService.Interfaces.Service
         DbSet<T> DbSet { get; }
         bool Add(T model);
         bool Delete(T model);
-        bool Delete(int id);
-        bool Update(T model);
+        T Delete(int id);
+        T  Update(T model);
+        IEnumerable<T> FindAll();
         T Get(int id);
         T GetFirst(Expression<Func<T, bool>> expression);
         IEnumerable<T> Find(Expression<Func<T, bool>> expression);

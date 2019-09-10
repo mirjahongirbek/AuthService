@@ -16,5 +16,9 @@ namespace AuthService.Attributes
             Arguments = new object[] { Roles, MethodName, UserName, Position };
         }
     }
+    public class TokenAttribute : Attribute
+    {
+        public string Name { get; set; }
+    }
 
 }

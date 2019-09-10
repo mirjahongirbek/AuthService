@@ -29,7 +29,7 @@ namespace TestApi.Controllers
         public object Register()
         {
 
-           var s= _auth.RegisterAsync(new User() { UserName = "joha", PasswordHash = "123456" }).Result; ;
+           var s= _auth.RegisterAsync(new User() { UserName = "joha", Password = "123456" }).Result; ;
             return s;
         }
         public object AddRole()
