@@ -41,7 +41,7 @@ namespace AuthService.Models
         /// Gets or sets the normalized user name for this user.
         /// </summary>
         [NotMapped]
-        public virtual string NormalizedUserName { get { return UserName.ToLower(); } }
+        public virtual string NormalizedUserName { get { return UserName?.ToLower(); } }
 
         /// <summary>
         /// Gets or sets the email address for this user.
@@ -57,7 +57,7 @@ namespace AuthService.Models
         /// Gets or sets the normalized email address for this user.
         /// </summary>
         [NotMapped]
-        public virtual string NormalizedEmail { get { return Email.ToLower(); } }
+        public virtual string NormalizedEmail { get { return Email?.ToLower(); } }
 
         /// <summary>
         /// Gets or sets a flag indicating if a user has confirmed their email address.
@@ -78,6 +78,7 @@ namespace AuthService.Models
         public string Devices { get; set; }
         [NotMapped]
         public List<string> DeviceList { get {
+                if (string.IsNullOrEmpty(Devices)) { Devices = ""; return new List<string>(); }
                var devices=Devices.Split(",");
                 return devices.ToList();
             } }

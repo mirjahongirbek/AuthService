@@ -20,6 +20,6 @@ namespace AuthService.Enum
         Blocked,
         IsUserClient,
         SendOtp,
-        NewClienId
+        SentOtpNewDevice
     }
 }

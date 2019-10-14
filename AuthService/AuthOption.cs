@@ -15,7 +15,7 @@ namespace AuthService
         {
             return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(KEY));
         }
-        public static bool CheckDeviceId { get; set; } = false;
+        public static bool CheckDeviceId { get; set; } = true;
         public static TimeSpan Otp { get; set; } = TimeSpan.FromSeconds(180);
     }
 }

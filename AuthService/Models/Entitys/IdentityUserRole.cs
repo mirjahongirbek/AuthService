@@ -37,6 +37,7 @@ namespace AuthService.Models
         public List<string> Roles { get; set; }
         public int MaxPosition { get; set; }
         public List<string> Actions { get; set; }
+        public int MyId { get; set; }
     }
 
 

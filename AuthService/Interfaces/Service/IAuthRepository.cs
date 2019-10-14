@@ -1,4 +1,5 @@
 ﻿using AuthService.Models;
+using AuthService.Models.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -30,15 +31,16 @@ namespace AuthService.Interfaces.Service
         Task Logout(string access);
                DbSet<TUser> DbSet { get; }
         Task<bool> Delete(int id);
-        
-     
+
+        LoginResult Login(TUser user);
         Task Update(TUser user);
         IEnumerable<TUser> FindAll();
         IEnumerable<TUser> Find(Expression<Func<TUser, bool>> expression);
         long Count();
-        
+        long Count(Expression<Func<TUser, bool>> expression);
         Task<ClaimsIdentity> LoginClaims(string username, string password);
         Task<bool> Delete(TUser user);
+        Task<(LoginResult, TUser)> Login(LoginViewModal model);
         Task<(LoginResult, TUser)> Login(string username, string password);
         void SetRefresh(TUser user);
         string SetToken(List<Claim> claims, TUser user);

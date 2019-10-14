@@ -1,9 +1,11 @@
-﻿using AuthService.Interfaces.Service;
+﻿using AuthService.Attributes;
+using AuthService.Interfaces.Service;
 using AuthService.Models;
+using AuthService.Models.Models;
 using EntityRepository.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RepositoryCore.Attributes;
+
 using RepositoryCore.CoreState;
 using System;
 using System.Collections.Generic;
@@ -90,8 +92,10 @@ namespace AuthService.Service
                     continue;
 
                 var name = string.IsNullOrEmpty(token.Name) ? i.Name : token.Name;
+
                 if (claims.FirstOrDefault(m => m.Type == name) == null)
                 {
+                    if(i.GetValue(user)!= null)
                     claims.Add(new Claim(name, i.GetValue(user).ToString()));
                 }
 
@@ -141,6 +145,26 @@ namespace AuthService.Service
             var roles = _roleService.GetList(IdRoles);
             return roles;
         }
+        public virtual async Task<(LoginResult, TUser)> Login(LoginViewModal model)
+        {
+            var user = _dbSet.Where(m => m.UserName == model.UserName && m.Password == RepositoryState.GetHashString(model.Password)).FirstOrDefault();
+            if (user == null)
+            {
+                return (null, null);
+            }
+            if (AuthOptions.CheckDeviceId)
+            {
+                if(user.DeviceList.Contains(model.DeviceId))
+                return (Login(user), user);
+                return (null, user);
+            }
+            return (Login(user), user);/*
+            if (user.DeviceList.Contains(model.DeviceId) && AuthOptions.CheckDeviceId)
+            {
+                return (Login(user), user);
+            }
+            return (null, user);*/
+        }
         public virtual async Task<(LoginResult, TUser)> Login(string username, string password)
         {
             var user = _dbSet.Where(m => m.UserName == username && m.Password == RepositoryState.GetHashString(password)).FirstOrDefault();
@@ -161,6 +185,7 @@ namespace AuthService.Service
                 AccessToken = user.Token,
                 UserName = user.UserName,
                 RefreshToken = user.RefreshToken,
+                MyId= user.Id,
                 Roles = roles.Select(m => m.Name).ToList()
             };
             return loginResult;
@@ -236,7 +261,7 @@ namespace AuthService.Service
         #region Otp
         public bool CheckOtp(TUser user, string otp)
         {
-             if(user.LastOtp== otp)
+            if (user.LastOtp == otp)
             {
                 return true;
             }
@@ -245,8 +270,8 @@ namespace AuthService.Service
 
         public bool CheckOtp(ClaimsPrincipal claims, string otp)
         {
-           var user= GetByUserName(claims.Identity.Name).Result;
-           return CheckOtp(user, otp);
+            var user = GetByUserName(claims.Identity.Name).Result;
+            return CheckOtp(user, otp);
         }
 
         public void SetOtp(ClaimsPrincipal claims, string otp)
@@ -264,17 +289,22 @@ namespace AuthService.Service
         }
         public void SetOtp(int id, string otp)
         {
-           SetOtp(GetMe(id).Result, otp);
+            SetOtp(GetMe(id).Result, otp);
         }
         public void SetOtp(string username, string otp)
         {
             SetOtp(GetByUserName(username).Result, otp);
 
         }
-        #endregion 
-       
 
-      
+        public long Count(Expression<Func<TUser, bool>> expression)
+        {
+           return _dbSet.Count(expression);
+        }
+        #endregion
+
+
+
     }
 }
 

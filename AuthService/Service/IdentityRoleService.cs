@@ -38,10 +38,11 @@ namespace AuthService.Service
             return true;
         }
 
-        public bool Delete(int id)
+        public TRole Delete(int id)
         {
            var model= Get(id);
-           return Delete(model);
+           Delete(model);
+            return model;
         }
 
         public IEnumerable<TRole> Find(Expression<Func<TRole, bool>> expression)
@@ -68,25 +69,15 @@ namespace AuthService.Service
             }
             return list;
         }
-        public bool Update(TRole model)
+        public TRole Update(TRole model)
         {
             _dbSet.Update(model);
-            return true;
-        }
-
-        TRole IRoleRepository<TRole>.Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        TRole IRoleRepository<TRole>.Update(TRole model)
-        {
-            throw new NotImplementedException();
+            return model;
         }
 
         public IEnumerable<TRole> FindAll()
         {
-            throw new NotImplementedException();
+           return _dbSet.Where(m=>true);
         }
     }
 }
